@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activar/Desactivar Extensión</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+            padding: 20px;
+            width: auto; /* Allow width to adapt to content */
+            min-width: 300px; /* Set a minimum width */
+            background-color: #2c2c2c; /* Darker background */
+            color: #e0e0e0; /* Lighter text color */
+            border-radius: 10px; /* Rounded corners */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+            display: flex; /* Use flexbox */
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items horizontally */
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px; /* Increased width */
+            height: 28px; /* Increased height */
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #888; /* Default slider color */
+            transition: .4s;
+            border-radius: 28px; /* Rounded slider */
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px; /* Increased height */
+            width: 24px; /* Increased width */
+            border-radius: 50%;
+            left: 2px; /* Adjusted position */
+            bottom: 2px; /* Adjusted position */
+            background-color: white;
+            transition: .4s;
+        }
+
+        input:checked + .slider {
+            background-color: #4CAF50; /* Green when checked */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(22px); /* Adjusted for new size */
+        }
+
+        /* Estilo para la ventana modal */
+        .modal {
+            width: auto; /* Allow modal width to adapt to content */
+            max-width: 100%; /* Set max width for modal */
+            padding: 20px; /* Increased padding */
+            display: flex;
+            flex-direction: column; /* Stack items vertically */
+            align-items: center; /* Center items */
+            color: #fff;
+        }
+
+        /* Estilo para la imagen dentro de la modal */
+        .modal img {
+            width: 50px;  /* Ajusta el tamaño de la imagen */
+            margin-bottom: 10px;  /* Separación entre la imagen y el encabezado */
+        }
+
+        h3 {
+            font-size: 1.8em; /* Increased font size */
+            margin-bottom: 10px; /* Spacing below title */
+        }
+
+        p {
+            font-size: 1em; /* Standardized font size */
+            margin: 20px 10px; /* Increased spacing for paragraphs (top/bottom, left/right) */
+        }
+
+        #autor {
+            font-size: 1.5em;
+            margin-top: 20px; /* Add margin to the top */
+            text-align: center; /* Center the text */
+        }
+
+        #may {
+            color: #dc7194;
+            text-decoration: none;
+        }
+
+        #shinigami {
+            color: #00988e;
+            text-decoration: none;
+        }
+
+        #thehail {
+            color: #ffeb3b;
+            text-decoration: none;
+        }
+
+        #kick {
+            color: #53fc18;
+            text-decoration: none;
+        }
+
+        #may:hover, #shinigami:hover, #thehail:hover, #kick:hover {
+            transform: scale(1.10);
+            text-decoration: underline;
+        }
+
+        #colorButtons {
+            display: grid; /* Change to grid layout */
+            grid-template-columns: repeat(4, 1fr); /* 4 columns */
+            gap: 8px; /* Space between buttons */
+            padding: 10px;
+        }
+
+        .color-btn, #openEmotesModalBtn {
+            flex: 1 1 30%; /* Allow buttons to grow and shrink, with a base width of 30% */
+            max-width: 120px; /* Set a maximum width for buttons */
+            height: 40px; /* Set height to match color buttons */
+            font-size: 1em; /* Increased font size */
+            width: 65px;
+            font-weight: bold;
+            color: white;
+            border: none; /* Remove border */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s; /* Transition for background color and shadow */
+            margin: 5px 0; /* Spacing between buttons */
+        }
+
+        .color-btn:hover, #openEmotesModalBtn:hover, #sortAsc:hover, #sortDesc:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+            opacity: 0.9; /* Slightly reduce opacity */
+        }
+
+        /* Adjusted button styles */
+        .color-btn {
+            color: white; /* Default text color */
+        }
+
+        /* Adjust text color for specific button colors */
+        .color-btn[data-color="#ffeb3b"], 
+        .color-btn[data-color="#BEBEBE"], 
+        .color-btn[data-color="#a19d26"],
+        .color-btn[data-color="#53fc18"] {
+            color: black; /* Change text color to black for green button */
+        }
+
+        /* Modal styling */
+        #emotesModal {
+            background-color: #353535; /* Dark background for modal */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Padding inside modal */
+            max-width: 300px; /* Set a maximum width for the emote menu */
+            width: 100%; /* Allow full width up to max-width */
+            overflow-y: auto; /* Allow vertical scrolling if content overflows */
+            overflow-x: hidden; /* Disable horizontal scrolling */
+        }
+
+        /* Input styling */
+        #searchEmotes {
+            width: 100%; /* Full width */
+            padding: 10px; /* Padding for input */
+            border-radius: 5px; /* Rounded corners */
+            border: none; /* Remove border */
+            margin-bottom: 10px; /* Spacing below input */
+        }
+
+        /* Style for the extension icon */
+        .extension-icon {
+            width: 50px; /* Set width for the icon */
+            margin-bottom: 10px; /* Spacing below the icon */
+        }
+
+        /* Style for the emote list */
+        #emoteList {
+            display: grid; /* Use grid layout */
+            grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 columns with responsive sizing */
+            gap: 10px; /* Space between emotes */
+            margin-top: 20px; /* Increased spacing above the emote list */
+            width: 100%; /* Ensure the emote list takes full width */
+            max-width: 100%; /* Set max width to 100% to prevent overflow */
+            overflow-y: auto; /* Allow vertical scrolling if content overflows */
+            overflow-x: hidden; /* Disable horizontal scrolling */
+        }
+
+        .emote-item {
+            text-align: center; /* Center the emote and name */
+            margin: 0; /* Remove margin to avoid extra spacing */
+            max-width: 80px; /* Set a maximum width for the emote item */
+            overflow: hidden; /* Hide overflow text */
+            white-space: nowrap; /* Prevent text from wrapping */
+            text-overflow: ellipsis; /* Show "..." for overflow text */
+        }
+
+        .emote-item p {
+            margin: 0; /* Remove margin for the paragraph */
+            font-size: 2vw; /* Responsive font size based on viewport width */
+            max-width: 100%; /* Ensure it takes the full width of the parent */
+            overflow: hidden; /* Hide overflow text */
+            white-space: nowrap; /* Prevent text from wrapping */
+            text-overflow: ellipsis; /* Show "..." for overflow text */
+        }
+
+        .emote-item img {
+            width: 50px; /* Set a fixed width for emotes */
+            height: 50px; /* Set a fixed height for emotes */
+        }
+
+        #openEmotesModalBtn {
+            background-color: #f0f0f0; /* Gray-ish background color */
+            color: #000; /* Default text color */
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+
+        .emotes-button {
+            cursor: pointer;
+            padding: 10px 15px;
+            width: 100px;
+            text-align: center;
+            color: #000; /* Default text color */
+            background-color: #f0f0f0; /* Gray-ish background color */
+            transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effect */
+        }
+
+        .emotes-button:hover {
+            background-color: #d0d0d0; /* Darker gray on hover */
+            color: #ffffff; /* Change text color to white on hover */
+        }
+
+        /* Additional styles for inline elements */
+        .center-text {
+            text-align: center;
+        }
+
+        .margin-bottom-20 {
+            margin-bottom: 20px;
+        }
+
+        .margin-bottom-10 {
+            margin-bottom: 10px;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            width: 200px;
+        }
+
+        .margin-left-10 {
+            margin-left: 10px;
+        }
+
+        /* Adjusted button styles for sort buttons */
+        #sortAsc, #sortDesc {
+            flex: 1 1 30%; /* Allow buttons to grow and shrink, with a base width of 30% */
+            max-width: 120px; /* Set a maximum width for buttons */
+            height: 40px; /* Set height to match color buttons */
+            font-size: 1em; /* Increased font size */
+            font-weight: bold;
+            color: white;
+            border: none; /* Remove border */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s; /* Transition for background color and shadow */
+            margin: 5px 0; /* Spacing between buttons */
+        }
+
+        #sortAsc:hover, #sortDesc:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+            opacity: 0.9; /* Slightly reduce opacity */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="modal">
+        <img src="icons/icon48.png" alt="Icono de la extensión" class="extension-icon">
+        <h3>7TV Mayonesos</h3>
+
+        <!-- Description for the switches -->
+        <p class="center-text margin-bottom-20">Ajusta las configuraciones de la extensión a continuación:</p>
+
+        <!-- Header for the switches -->
+        <h4 class="center-text margin-bottom-10">Configuraciones de la extensión</h4>
+
+        <!-- Container for switches -->
+        <div class="flex-container">
+            <!-- Card for each switch -->
+            <div class="card">
+                <label class="switch" title="Habilita o deshabilita los emotes de 7TV.">
+                    <input type="checkbox" id="toggleExtension">
+                    <span class="slider"></span>
+                </label>
+                <p id="status" class="margin-left-10" title="Habilita o deshabilita los emotes de 7TV.">Emotes</p>
+            </div>
+
+            <div class="card">
+                <label class="switch" title="Habilita o deshabilita el cambio de color de texto.">
+                    <input type="checkbox" id="toggleTextColor">
+                    <span class="slider"></span>
+                </label>
+                <p id="textStatus" class="margin-left-10" title="Habilita o deshabilita el cambio de color de texto.">Color de texto</p>
+            </div>
+
+            <div class="card">
+                <label class="switch" title="Habilita o deshabilita la censura de palabras.&#10;Por lo general ocultará insultos bloqueados en kick o spoilers bloqueados por los mods.">
+                    <input type="checkbox" id="toggleCensure">
+                    <span class="slider"></span>
+                </label>
+                <p id="censureStatus" class="margin-left-10" title="Habilita o deshabilita la censura de palabras. &#10;Por lo general ocultará insultos bloqueados en kick o spoilers bloqueados por los mods.">Censura</p>
+            </div>
+        </div>
+
+        <!-- Header for color buttons -->
+        <h4 class="center-text margin: 20px 0;">Selecciona un color para personalizar la apariencia:</h4>
+
+        <!-- Botón para cambiar el color -->
+        <div id="colorButtons">
+            <button class="color-btn" data-color="#9147ff" style="background-color: #9147ff;">Morado</button>
+            <button class="color-btn" data-color="#ff0000" style="background-color: #ff0000;">Rojo</button>
+            <button class="color-btn" data-color="#e91e63" style="background-color: #e91e63;">Fucsia</button>
+            <button class="color-btn" data-color="#dc7194" style="background-color: #dc7194;">Rosa</button>
+            <button class="color-btn" data-color="#007bff" style="background-color: #007bff;">Azul</button>
+            <button class="color-btn" data-color="#00988e" style="background-color: #00988e;">Turquesa</button>
+            <button class="color-btn" data-color="#ff9800" style="background-color: #ff9800;">Naranja</button>
+            <button class="color-btn" data-color="#7e3705" style="background-color: #7e3705;">Marrón</button>
+            <button class="color-btn" data-color="#a19d26" style="background-color: #a19d26;">Dorado</button>
+            <button class="color-btn" data-color="#BEBEBE" style="background-color: #BEBEBE;">Plateado</button>
+            <button class="color-btn" data-color="#53fc18" style="background-color: #53fc18;">Verde</button>
+            <button class="color-btn" data-color="#ffeb3b" style="background-color: #ffeb3b;">Amarillo</button>
+        </div>
+
+        <h4 class="center-text margin-bottom-10">O selecciona un color personalizado:</h4>
+        <input type="color" id="hueWheel" value="#ff0000" style="width: 65px; height: 30px; border: none; border-radius: 5px; cursor: pointer; margin: 10px;">
+
+        <!-- Botón para abrir la modal -->
+        <div id="openEmotesModalBtn" class="emotes-button">Ver emotes</div>
+        <div class="modal" id="emotesModal" style="display: none;">
+            <!-- Campo de búsqueda para filtrar los emotes -->
+            <input type="text" id="searchEmotes" placeholder="Buscar emotes...">
+            <div id="sortButtons" class="flex-container" style="margin-bottom: 10px;">
+                <button id="sortAsc" data-color="#26a147" style="background-color: #26a147">Ordenar Ascendente</button>
+                <button id="sortDesc" data-color="#be2121" style="background-color: #be2121">Ordenar Descendente</button>
+            </div>
+            <div id="emoteList"></div>
+        </div>
+
+        <p id="autor">Muestra los emotes de 7TV en <a id="kick" href="https://kick.com/maaylen" target="_blank">Kick</a>
+             de <a id="may" href="https://x.com/Maaylen" target="_blank">Maylen</a> creada por 
+             <a id="shinigami" href="https://x.com/Shinigami_M10" target="_blank">Shinigami</a> y contribuciones de <a id="thehail" href="https://x.com/Ruben4545" target="_blank">Thehail</a>.</p>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="content.js"></script>
+
+</body>
+</html>

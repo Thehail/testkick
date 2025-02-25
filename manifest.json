@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "Kick 7TV Mayonesos",
+    "version": "1.2",
+    "description": "Muestra los emotes de 7TV en Kick de Maylen creada por @Shinigami.",
+    "action": {
+    "default_popup": "popup.html"
+    },
+    "permissions": ["storage", "scripting","activeTab"],
+    "host_permissions": ["https://7tv.io/*", "https://api.7tv.app/*", "https://cdn.7tv.app/*"],
+    "content_scripts": [
+      {
+        "matches": ["*://kick.com/*"],
+        "js": ["content.js"]
+      }
+    ],
+    "web_accessible_resources": [
+    {
+      "resources": ["script.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+    "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src *"
+  },
+    "background": {
+      "service_worker": "background.js"
+    },
+    "icons": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  }
